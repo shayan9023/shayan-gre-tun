@@ -9,11 +9,11 @@ ACTIVE="$BASE/active"
 TAG="vatan-mtm"
 
 if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
-  printf 'Run this manager as root (sudo bash vatan_multi_tunnel_manager.sh).\n' >&2
+  printf 'Run this manager as root (sudo bash shayan.sh).\n' >&2
   exit 1
 fi
 
-mkdir -p a"$PROFILES" || exit 1
+mkdir -p "$PROFILES" || exit 1
 chmod 700 "$BASE" "$PROFILES" 2>/dev/null || true
 umask 077
 
