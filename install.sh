@@ -20,4 +20,40 @@ bash -n "$TMP" || { printf 'Downloaded manager has a syntax error. Existing inst
 chmod 0755 "$TMP"
 mv -f "$TMP" "$DEST"
 trap - EXIT
+
+ensure_command_in_path() {
+  local resolved directory candidate
+  local -a path_dirs=()
+
+  resolved=$(command -v shayan 2>/dev/null || true)
+  if [[ $resolved == "$DEST" ]] ||
+     [[ -L $resolved && $(readlink "$resolved" 2>/dev/null || true) == "$DEST" ]]; then
+    return 0
+  fi
+  if [[ -n $resolved ]]; then
+    printf 'A different shayan command already exists at %s; it was left untouched. Run %s directly or resolve the command-name conflict.\n' \
+      "$resolved" "$DEST" >&2
+    return 0
+  fi
+
+  IFS=: read -r -a path_dirs <<< "${PATH:-}"
+  for directory in "${path_dirs[@]}"; do
+    [[ $directory == /* && $directory != /usr/local/bin && -d $directory && -w $directory ]] || continue
+    candidate="$directory/shayan"
+    if [[ -L $candidate && $(readlink "$candidate" 2>/dev/null || true) == "$DEST" ]]; then
+      resolved=$(command -v shayan 2>/dev/null || true)
+      [[ $resolved == "$candidate" ]] && return 0
+      continue
+    fi
+    [[ ! -e $candidate && ! -L $candidate ]] || continue
+    ln -s "$DEST" "$candidate" || continue
+    resolved=$(command -v shayan 2>/dev/null || true)
+    [[ $resolved == "$candidate" ]] && return 0
+  done
+
+  printf 'Manager installed at %s, but no free directory in PATH could expose the shayan command. Add /usr/local/bin to PATH or run %s directly.\n' \
+    "$DEST" "$DEST" >&2
+}
+
+ensure_command_in_path
 exec "$DEST" "$@"
