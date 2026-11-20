@@ -15,6 +15,8 @@ TMP="$(mktemp /usr/local/bin/.shayan.XXXXXX)"
 trap 'rm -f "$TMP"' EXIT
 
 curl -fsSL --retry 3 --connect-timeout 10 "$MANAGER_URL" -o "$TMP"
+[[ -s "$TMP" ]] || { printf 'Downloaded manager is empty. Existing installation was not changed.\n' >&2; exit 1; }
+bash -n "$TMP" || { printf 'Downloaded manager has a syntax error. Existing installation was not changed.\n' >&2; exit 1; }
 chmod 0755 "$TMP"
 mv -f "$TMP" "$DEST"
 trap - EXIT
