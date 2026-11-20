@@ -11,7 +11,7 @@ Run the installer as root:
 curl -fsSL https://raw.githubusercontent.com/shayan9023/shayan-gre-tun/main/install.sh | sudo bash
 ```
 
-The installer checks the downloaded manager's syntax before replacing `/usr/local/bin/shayan`. Tunnel profiles are stored under `/etc/vatan-gre-manager/profiles` and remain in place when the manager is upgraded.
+The installer checks the downloaded manager's syntax before replacing `/usr/local/bin/shayan`, and creates `/usr/bin/shayan` when that command path is free so the command works in typical root shells. Tunnel profiles are stored under `/etc/vatan-gre-manager/profiles` and remain in place when the manager is upgraded.
 
 Run the manager with:
 

@@ -3,6 +3,7 @@ set -euo pipefail
 
 MANAGER_URL="https://raw.githubusercontent.com/shayan9023/shayan-gre-tun/main/shayan.sh"
 DEST="/usr/local/bin/shayan"
+COMMAND_LINK="/usr/bin/shayan"
 
 if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
   printf 'Run the installer as root (use sudo -i first).\n' >&2
@@ -20,6 +21,15 @@ bash -n "$TMP" || { printf 'Downloaded manager has a syntax error. Existing inst
 chmod 0755 "$TMP"
 mv -f "$TMP" "$DEST"
 trap - EXIT
+
+if [[ -L $COMMAND_LINK && $(readlink "$COMMAND_LINK" 2>/dev/null || true) == "$DEST" ]]; then
+  :
+elif [[ -e $COMMAND_LINK || -L $COMMAND_LINK ]]; then
+  printf 'A different command already exists at %s; it was left untouched.\n' "$COMMAND_LINK" >&2
+else
+  ln -s "$DEST" "$COMMAND_LINK" || printf 'Could not create %s; the manager is still available at %s.\n' \
+    "$COMMAND_LINK" "$DEST" >&2
+fi
 
 ensure_command_in_path() {
   local resolved directory candidate
